@@ -2,6 +2,23 @@
 #include "List.h"
 #include "Node.h"
 
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <cstdlib>
+#include <strings.h>
+#include <unistd.h>
+#include <cstring>
+#include <json-c/json.h>
+
+#define PORT 3550
+#define BACKLOG 4
+#define MAXDATASIZE 1000
+
+using namespace std;
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
     List* prueba = new List();
@@ -16,4 +33,161 @@ int main() {
     prueba->getList();
 
     return 0;
+}
+
+int runServer() {
+
+    int fd, fd2;
+
+    struct sockaddr_in server;
+
+    struct sockaddr_in client;
+
+
+    if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        printf("error en socket()\n");
+        exit(-1);
+    }
+
+    server.sin_family = AF_INET;
+
+    server.sin_port = htons(PORT);
+
+    server.sin_addr.s_addr = INADDR_ANY;
+
+    bzero(&(server.sin_zero), 8);
+
+    if (bind(fd, (struct sockaddr *) &server,
+             sizeof(struct sockaddr)) == -1) {
+        printf("error en bind() \n");
+        exit(-1);
+    }
+
+    if (listen(fd, BACKLOG) == -1) {
+        printf("error en listen()\n");
+        exit(-1);
+    }
+
+    printf("\nServidor 'Gladiators - GBP' abierto.\n");
+
+    while (true) {
+
+        unsigned int address_size = sizeof(client);
+
+        if ((fd2 = accept(fd, (struct sockaddr *) &client,
+                          &address_size)) == -1) {
+            printf("error en accept()\n");
+            exit(-1);
+        }
+
+        printf("\nSe obtuvo una conexión de un cliente.\n");
+
+        ssize_t r;
+
+        char buff[MAXDATASIZE];
+
+        for (;;) {
+            r = read(fd2, buff, MAXDATASIZE);
+
+            if (r == -1) {
+                perror("read");
+                return EXIT_FAILURE;
+            }
+            if (r == 0)
+                break;
+            printf("\nREAD: %s\n", buff);
+
+
+
+            ///JSON Reads
+
+
+
+            ///KEY: COMENZAR
+            ///Obtiene el flag para comenzar el juego
+            struct json_object *tempComenzar;
+            //cout<<"COMENZAR"<<endl;
+            json_object *parsed_jsonComenzar = json_tokener_parse(buff);
+            json_object_object_get_ex(parsed_jsonComenzar, "COMENZAR", &tempComenzar);
+            //printf("Por comenzar: %s\n", json_object_get_string(tempComenzar));
+
+
+
+
+
+
+            ///KEYS HISTORIC LABELS
+
+
+
+            /*
+            ///KEY: TEMPLATE
+            ///Obtiene un request para
+            struct json_object *tempZZ;
+            cout<<"ZZ"<<endl;
+            json_object *parsed_jsonZZ = json_tokener_parse(buff);
+            json_object_object_get_ex(parsed_jsonZZ, "ZZ", &tempZZ);
+             */
+
+
+
+            ///JSON Writes
+
+
+
+            ///Obtendra un request para comenzar el juego
+            ///Verifica que reciba los KEYS: COMENZAR
+            if (json_object_get_string(tempComenzar) != nullptr) {
+                ///JSON saliente del servidor
+                string zoneSize = sendZoneSize();
+                ///Envio al cliente
+                send(fd2, zoneSize.c_str(), MAXDATASIZE, 0);
+                printf("\nWRITE: %s\n", zoneSize.c_str());
+            }
+
+
+
+            /*
+            ///Obtendra un request para obtener
+            ///Verifica que reciba los KEYS: TEMPLATE
+            if (json_object_get_string(tempZZ) != nullptr ) {
+                ///JSON saliente del servidor
+                string aTypeZZ = sendAType("ZZ",json_object_get_string(tempZZ));
+                ///Envio al cliente
+                send(fd2, aTypeZZ.c_str(), MAXDATASIZE, 0);
+            }
+             */
+
+        }
+
+        ///Reestablece el buffer
+        memset(buff, 0, MAXDATASIZE);
+
+        cout <<
+             "\n\n--------------------------------------------------------------------------------"
+             "END--------------------------------------------------------------------------------\n"
+             << endl;
+
+    }
+
+    close(fd2);
+
+}
+
+/**
+ * Retorna al cliente el tamaño de la Zona de Intimidación.
+ * @return JSON
+ */
+string sendZoneSize() {
+
+    int zoneSize = juego->getCuadricula()->getSize();
+
+    json_object *jobjZoneSize = json_object_new_object();
+
+    json_object *jstringZoneSize = json_object_new_string(to_string(zoneSize).c_str());
+
+    json_object_object_add(jobjZoneSize,"ZONESIZE", jstringZoneSize);
+
+    return json_object_to_json_string(jobjZoneSize);
+
 }
