@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <json-c/json.h>
+#include <sstream>
 
 #define PORT 3550
 #define BACKLOG 4
@@ -19,20 +20,26 @@
 
 using namespace std;
 
-int main() {
-    std::cout << "Hello, World!" << std::endl;
-    List* prueba = new List();
-    prueba->insertFirst(3);
-    prueba->insertFirst(2);
-    prueba->insertFirst(1);
-    prueba->modifyNode(2,10);
-    prueba->getList();
-    cout << prueba->getNode(1) << endl;
-    cout << "---------------" << endl;
-    prueba->deleteFirst();
-    prueba->getList();
+static List* lista;
 
-    return 0;
+
+
+/**
+ * Retorna al cliente el tamaño de la Zona de Intimidación.
+ * @return JSON
+ */
+
+string sendRecibido() {
+
+
+    json_object* jobjRecibido = json_object_new_object();
+
+    json_object* jstringRecibido = json_object_new_string("Kenny Bell");
+
+    json_object_object_add(jobjRecibido,"ZONESIZE", jstringRecibido);
+
+    return json_object_to_json_string(jobjRecibido);
+
 }
 
 int runServer() {
@@ -103,12 +110,12 @@ int runServer() {
 
 
 
-            ///KEY: COMENZAR
+            ///KEY: INSERT
             ///Obtiene el flag para comenzar el juego
-            struct json_object *tempComenzar;
+            struct json_object* tempInsert;
             //cout<<"COMENZAR"<<endl;
-            json_object *parsed_jsonComenzar = json_tokener_parse(buff);
-            json_object_object_get_ex(parsed_jsonComenzar, "COMENZAR", &tempComenzar);
+            json_object* parsed_jsonInsert = json_tokener_parse(buff);
+            json_object_object_get_ex(parsed_jsonInsert, "INSERT", &tempInsert);
             //printf("Por comenzar: %s\n", json_object_get_string(tempComenzar));
 
 
@@ -136,13 +143,23 @@ int runServer() {
 
 
             ///Obtendra un request para comenzar el juego
-            ///Verifica que reciba los KEYS: COMENZAR
-            if (json_object_get_string(tempComenzar) != nullptr) {
+            ///Verifica que reciba los KEYS: INSERT
+            if (json_object_get_string(tempInsert) != nullptr) {
+
+                ///Conversion de string del cliente a int en el server
+                stringstream temp(json_object_get_string(tempInsert));
+                int insert;
+                temp >> insert;
+
+                ///Insertar al principio en la lista
+                lista->insertFirst(insert);
+                lista->getList();
+
                 ///JSON saliente del servidor
-                string zoneSize = sendZoneSize();
+                string Recibido = sendRecibido();
                 ///Envio al cliente
-                send(fd2, zoneSize.c_str(), MAXDATASIZE, 0);
-                printf("\nWRITE: %s\n", zoneSize.c_str());
+                send(fd2, Recibido.c_str(), MAXDATASIZE, 0);
+                printf("\nWRITE: %s\n", Recibido.c_str());
             }
 
 
@@ -174,20 +191,19 @@ int runServer() {
 
 }
 
-/**
- * Retorna al cliente el tamaño de la Zona de Intimidación.
- * @return JSON
- */
-string sendZoneSize() {
+int main() {
+    std::cout << "Hello, World!" << std::endl;
+    List* prueba = new List();
+    prueba->insertFirst(3);
+    prueba->insertFirst(2);
+    prueba->insertFirst(1);
+    prueba->modifyNode(2,10);
+    prueba->getList();
+    cout << prueba->getNode(1) << endl;
+    cout << "---------------" << endl;
+    prueba->deleteFirst();
+    prueba->getList();
 
-    int zoneSize = juego->getCuadricula()->getSize();
-
-    json_object *jobjZoneSize = json_object_new_object();
-
-    json_object *jstringZoneSize = json_object_new_string(to_string(zoneSize).c_str());
-
-    json_object_object_add(jobjZoneSize,"ZONESIZE", jstringZoneSize);
-
-    return json_object_to_json_string(jobjZoneSize);
+    runServer();
 
 }
