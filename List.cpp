@@ -30,7 +30,7 @@ void List::setLen(int _len) {
     len = _len;
 }
 
-void List::insertLast(string* _data){
+void List::insertFirst(int _data){
 
     Node* nNode = new Node(_data);
 
@@ -48,41 +48,66 @@ void List::insertLast(string* _data){
 }
 
 
-void List::deleteNode(string* _data){
-    Node* delNode = nullptr;
-    Node* temp = head;
-    Node* aux = head;
-    while (aux != nullptr && aux->getData() != _data) { //CAMBIAR POR .COMPARE
-        temp = aux;
-        aux = aux->getNext();
+void List::modifyNode(int pos,int _data){
+    if (pos >= getLen()){
+        cout << "La posición no existe" << endl;
     }
-    if (aux == nullptr) {
-        cout << _data << " no esta en la lista\n" << endl;
-    } else {
-        delNode = aux;
-        if (head == delNode) {
-            setHead(head->getNext());
-        } else {
-            temp->setNext(aux->getNext());
+    else{
+        Node* temp = head;
+        if (pos == 0){
+            temp->setNext(head->getNext());
+            temp->setData(_data);
+            setHead(temp);
+        }
+        else {
+            int c = 1;
+            while (c < pos) {
+                temp = temp->getNext();
+                c++;
+            }
+            temp->getNext()->setData(_data);
         }
     }
-    delNode->setNext(nullptr);
 
-    len-=1;
+}
 
+void List::deleteFirst(){
+    if (head != nullptr) {
+        setHead(head->getNext());
+        len-=1;
+    } else {
+        cout << "La lista esta vacia" << endl;
+        return;
+    }
 }
 
 
 
-Node* List::getNode(int _index){
+int List::getNode(int _index){
     Node* temp = nullptr;
-    if (_index <= len) {
-        int i = 1;
+    if (_index < len) {
+        int i = 0;
         temp = head;
         while (i != _index) {
             temp = temp->getNext();
             i++;
         }
+        return temp->getData();
     }
-    return temp;
+    else{
+        cout << "Indice fuera del alcance" << endl;
+    }
+}
+
+void List::getList() {
+    Node* temp = head;
+    if (temp != nullptr) {
+        while (temp != nullptr) {
+            cout << temp->getData() << endl;
+            temp = temp->getNext();
+        }
+        return;
+    }
+    cout << "La lista esta vacia" << endl;
+    return;
 }

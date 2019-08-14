@@ -5,16 +5,16 @@
 
 using namespace std;
 
-Node::Node(string* _data){
+Node::Node(int _data){
     data = _data;
     next = nullptr;
 }
 
-string* Node::getData(){
+int Node::getData(){
     return data;
 }
 
-void Node::setData(string* _data) {
+void Node::setData(int _data) {
     data = _data;
 }
 

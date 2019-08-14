@@ -19,9 +19,11 @@ public:
     void setHead(Node* _head);
     int getLen();
     void setLen(int _len);
-    void insertLast(string* _data);
-    void deleteNode(string* _data);
-    Node* getNode(int _index);
+    void insertFirst(int _data);
+    void modifyNode(int pos, int _data);
+    void deleteFirst();
+    int getNode(int _index);
+    void getList();
 
 };
 
