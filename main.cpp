@@ -2,6 +2,13 @@
 #include "List.h"
 #include "Node.h"
 
+#include <arpa/inet.h>
+
+#include <chrono>
+
+#include <thread>
+#include <string>
+
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -34,9 +41,11 @@ string sendRecibido() {
 
     json_object* jobjRecibido = json_object_new_object();
 
-    json_object* jstringRecibido = json_object_new_string("Kenny Bell");
+    string msm = "Kenny Bell";
 
-    json_object_object_add(jobjRecibido,"ZONESIZE", jstringRecibido);
+    json_object* jstringRecibido = json_object_new_string(msm.c_str());
+
+    json_object_object_add(jobjRecibido,"RECIBIDO", jstringRecibido);
 
     return json_object_to_json_string(jobjRecibido);
 
@@ -145,13 +154,16 @@ int runServer() {
             ///Obtendra un request para comenzar el juego
             ///Verifica que reciba los KEYS: INSERT
             if (json_object_get_string(tempInsert) != nullptr) {
+                
 
                 ///Conversion de string del cliente a int en el server
                 stringstream temp(json_object_get_string(tempInsert));
+
                 int insert;
                 temp >> insert;
 
                 ///Insertar al principio en la lista
+                
                 lista->insertFirst(insert);
                 lista->getList();
 
@@ -203,7 +215,8 @@ int main() {
     cout << "---------------" << endl;
     prueba->deleteFirst();
     prueba->getList();
-
+    
+    lista = new List();
     runServer();
 
 }
