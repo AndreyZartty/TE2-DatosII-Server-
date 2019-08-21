@@ -41,7 +41,7 @@ string sendRecibido() {
 
     json_object* jobjRecibido = json_object_new_object();
 
-    string msm = "Kenny Bell";
+    string msm = "Se ha insertado a la lista correctamente";
 
     json_object* jstringRecibido = json_object_new_string(msm.c_str());
 
@@ -84,7 +84,7 @@ int runServer() {
         exit(-1);
     }
 
-    printf("\nServidor 'Gladiators - GBP' abierto.\n");
+    printf("\nServidor 'TE DATOS II' abierto.\n");
 
     while (true) {
 
@@ -119,14 +119,29 @@ int runServer() {
 
 
 
-            ///KEY: INSERT
-            ///Obtiene el flag para comenzar el juego
-            struct json_object* tempInsert;
-            //cout<<"COMENZAR"<<endl;
-            json_object* parsed_jsonInsert = json_tokener_parse(buff);
-            json_object_object_get_ex(parsed_jsonInsert, "INSERT", &tempInsert);
-            //printf("Por comenzar: %s\n", json_object_get_string(tempComenzar));
+            ///KEY: INSERT_LIST
+            ///Obtiene un request para insertar a la lista
+            struct json_object* tempInsertL;
+            json_object* parsed_jsonInsertL = json_tokener_parse(buff);
+            json_object_object_get_ex(parsed_jsonInsertL, "INSERT_LIST", &tempInsertL);
 
+            ///KEY: DELETE_LIST
+            ///Obtiene un request para borrar el primero de la lista
+            struct json_object *tempDeleteL;
+            json_object *parsed_jsonDeleteL = json_tokener_parse(buff);
+            json_object_object_get_ex(parsed_jsonDeleteL, "DELETE_LIST", &tempDeleteL);
+
+            ///KEY: EDIT_LIST
+            ///Obtiene un request para editar una posicion de la lista
+            struct json_object *tempEditL;
+            json_object *parsed_jsonEditL = json_tokener_parse(buff);
+            json_object_object_get_ex(parsed_jsonEditL, "EDIT_LIST", &tempEditL);
+
+            ///KEY: GET_FROM_LIST
+            ///Obtiene un request para
+            struct json_object *tempGetFromL;
+            json_object *parsed_jsonGetFromL = json_tokener_parse(buff);
+            json_object_object_get_ex(parsed_jsonGetFromL, "GET_FROM_LIST", &tempGetFromL);
 
 
 
@@ -152,12 +167,12 @@ int runServer() {
 
 
             ///Obtendra un request para comenzar el juego
-            ///Verifica que reciba los KEYS: INSERT
-            if (json_object_get_string(tempInsert) != nullptr) {
+            ///Verifica que reciba los KEYS: INSERT_LIST
+            if (json_object_get_string(tempInsertL) != nullptr) {
                 
 
                 ///Conversion de string del cliente a int en el server
-                stringstream temp(json_object_get_string(tempInsert));
+                stringstream temp(json_object_get_string(tempInsertL));
 
                 int insert;
                 temp >> insert;
@@ -165,10 +180,13 @@ int runServer() {
                 ///Insertar al principio en la lista
                 
                 lista->insertFirst(insert);
+
+                cout << "\nLista:" << endl;
                 lista->getList();
 
                 ///JSON saliente del servidor
                 string Recibido = sendRecibido();
+
                 ///Envio al cliente
                 send(fd2, Recibido.c_str(), MAXDATASIZE, 0);
                 printf("\nWRITE: %s\n", Recibido.c_str());
@@ -204,7 +222,7 @@ int runServer() {
 }
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    std::cout << "El ano se ha abierto!" << std::endl;
     List* prueba = new List();
     prueba->insertFirst(3);
     prueba->insertFirst(2);
