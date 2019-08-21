@@ -1,6 +1,7 @@
 #include <iostream>
 #include "List.h"
 #include "Node.h"
+#include "ArbolBinario.h"
 
 #include <arpa/inet.h>
 
@@ -28,6 +29,7 @@
 using namespace std;
 
 static List* lista;
+static ArbolBinario* arbolBB;
 
 
 
@@ -164,7 +166,17 @@ int runServer() {
             json_object *parsed_jsonGetFromL = json_tokener_parse(buff);
             json_object_object_get_ex(parsed_jsonGetFromL, "GET_FROM_LIST", &tempGetFromL);
 
+            ///KEY: INSERT_ABB
+            ///Obtiene un request para insertar al arbol binario
+            struct json_object *tempInsertABB;
+            json_object *parsed_jsonInsertABB = json_tokener_parse(buff);
+            json_object_object_get_ex(parsed_jsonInsertABB, "INSERT_ABB", &tempInsertABB);
 
+            ///KEY: DELETE_ABB
+            ///Obtiene un request para borrar un dato del arbol binario
+            struct json_object *tempDeleteABB;
+            json_object *parsed_jsonDeleteABB = json_tokener_parse(buff);
+            json_object_object_get_ex(parsed_jsonDeleteABB, "DELETE_ABB", &tempDeleteABB);
 
 
 
@@ -303,6 +315,80 @@ int runServer() {
                 printf("\nWRITE: %s\n", DeleteL.c_str());
             }
 
+            if (json_object_get_string(tempInsertABB) != nullptr) {
+
+
+                ///Conversion de string del cliente a int en el server
+                stringstream temp(json_object_get_string(tempInsertABB));
+
+                int insert;
+                temp >> insert;
+
+                ///Insertar al principio en la lista
+
+                arbolBB->Ingresar(insert);
+
+                cout << "\nArbol InOrder:" << endl;
+                arbolBB->MostrarInOrden();
+
+                cout << "\nArbol PreOrder:" << endl;
+                arbolBB->MostrarPreOrden();
+
+                cout << "\nArbol PostOrder:" << endl;
+                arbolBB->MostrarPostOrden();
+
+                json_object* jobjInsertABB = json_object_new_object();
+
+                string msm = "Se ha insertado con exito al Arbol Binario";
+
+                json_object* jstringInsertABB = json_object_new_string(msm.c_str());
+
+                json_object_object_add(jobjInsertABB,"INSERTADO_ABB", jstringInsertABB);
+
+                ///JSON saliente del servidor
+                string InsertadoABB = json_object_to_json_string(jobjInsertABB);
+
+                ///Envio al cliente
+                send(fd2, InsertadoABB.c_str(), MAXDATASIZE, 0);
+                printf("\nWRITE: %s\n", InsertadoABB.c_str());
+            }
+
+            if (json_object_get_string(tempDeleteABB) != nullptr) {
+
+
+                ///Conversion de string del cliente a int en el server
+                stringstream temp(json_object_get_string(tempDeleteABB));
+
+                int deleteABB;
+                temp >> deleteABB;
+
+                ///Insertar al principio en la lista
+
+                string msm = arbolBB->EliminarHi(deleteABB);
+
+                cout << "\nArbol InOrder:" << endl;
+                arbolBB->MostrarInOrden();
+
+                cout << "\nArbol PreOrder:" << endl;
+                arbolBB->MostrarPreOrden();
+
+                cout << "\nArbol PostOrder:" << endl;
+                arbolBB->MostrarPostOrden();
+
+                json_object* jobjDeleteABB = json_object_new_object();
+
+                json_object* jstringDeleteABB = json_object_new_string(msm.c_str());
+
+                json_object_object_add(jobjDeleteABB,"ELIMINADO_ABB", jstringDeleteABB);
+
+                ///JSON saliente del servidor
+                string EliminadoABB = json_object_to_json_string(jobjDeleteABB);
+
+                ///Envio al cliente
+                send(fd2, EliminadoABB.c_str(), MAXDATASIZE, 0);
+                printf("\nWRITE: %s\n", EliminadoABB.c_str());
+            }
+
             /*
             ///Obtendra un request para obtener
             ///Verifica que reciba los KEYS: TEMPLATE
@@ -344,6 +430,7 @@ int main() {
     prueba->getList();
     
     lista = new List();
+    arbolBB = new ArbolBinario();
     runServer();
 
 }
