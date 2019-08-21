@@ -45,9 +45,24 @@ string sendRecibido() {
 
     json_object* jstringRecibido = json_object_new_string(msm.c_str());
 
-    json_object_object_add(jobjRecibido,"RECIBIDO", jstringRecibido);
+    json_object_object_add(jobjRecibido,"RECIBIDO_L", jstringRecibido);
 
     return json_object_to_json_string(jobjRecibido);
+
+}
+
+string sendModificado() {
+
+
+    json_object* jobjModificado = json_object_new_object();
+
+    string msm = "Se ha modificado la lista correctamente";
+
+    json_object* jstringModificado = json_object_new_string(msm.c_str());
+
+    json_object_object_add(jobjModificado,"MODIFICADO_L", jstringModificado);
+
+    return json_object_to_json_string(jobjModificado);
 
 }
 
@@ -137,8 +152,14 @@ int runServer() {
             json_object *parsed_jsonEditL = json_tokener_parse(buff);
             json_object_object_get_ex(parsed_jsonEditL, "EDIT_LIST", &tempEditL);
 
+            ///KEY: POS_TO_EDIT
+            ///Obtiene la posicion a editar
+            struct json_object *tempPosEditL;
+            json_object *parsed_jsonPosEditL = json_tokener_parse(buff);
+            json_object_object_get_ex(parsed_jsonPosEditL, "POS_TO_EDIT", &tempPosEditL);
+
             ///KEY: GET_FROM_LIST
-            ///Obtiene un request para
+            ///Obtiene un request para obtener de la lista
             struct json_object *tempGetFromL;
             json_object *parsed_jsonGetFromL = json_tokener_parse(buff);
             json_object_object_get_ex(parsed_jsonGetFromL, "GET_FROM_LIST", &tempGetFromL);
@@ -192,7 +213,95 @@ int runServer() {
                 printf("\nWRITE: %s\n", Recibido.c_str());
             }
 
+            if (json_object_get_string(tempEditL) != nullptr) {
 
+
+                ///Conversion de string del cliente a int en el server
+                stringstream temp(json_object_get_string(tempEditL));
+
+                int dataEdit;
+                temp >> dataEdit;
+
+
+                if (json_object_get_string(tempPosEditL) != nullptr){
+
+                    stringstream temp(json_object_get_string(tempPosEditL));
+
+                    int posEdit;
+                    temp >> posEdit;
+
+                    ///Modificar la lista
+
+                    lista->modifyNode(posEdit,dataEdit);
+
+                    cout << "\nLista:" << endl;
+                    lista->getList();
+
+                    ///JSON saliente del servidor
+                    string Modificado = sendModificado();
+
+                    ///Envio al cliente
+                    send(fd2, Modificado.c_str(), MAXDATASIZE, 0);
+                    printf("\nWRITE: %s\n", Modificado.c_str());
+
+                }
+
+            }
+
+            if (json_object_get_string(tempGetFromL) != nullptr) {
+
+
+                ///Conversion de string del cliente a int en el server
+                stringstream temp(json_object_get_string(tempGetFromL));
+
+                int getFromL;
+                temp >> getFromL;
+
+                json_object* jobjGetFromL = json_object_new_object();
+
+                string msm = to_string(lista->getNode(getFromL));
+
+                json_object* jstringGetFromL = json_object_new_string(msm.c_str());
+
+                json_object_object_add(jobjGetFromL,"GET_P_L", jstringGetFromL);
+
+
+
+                cout << "\nLista:" << endl;
+                lista->getList();
+
+                ///JSON saliente del servidor
+                string GetFromL = json_object_to_json_string(jobjGetFromL);
+
+                ///Envio al cliente
+                send(fd2, GetFromL.c_str(), MAXDATASIZE, 0);
+                printf("\nWRITE: %s\n", GetFromL.c_str());
+            }
+
+            if (json_object_get_string(tempDeleteL) != nullptr) {
+
+                lista->deleteFirst();
+
+                json_object* jobjDeleteL = json_object_new_object();
+
+                string msm = "Se ha eliminado el primer objeto de la lista";
+
+                json_object* jstringDeleteL = json_object_new_string(msm.c_str());
+
+                json_object_object_add(jobjDeleteL,"ELIMINADO_L", jstringDeleteL);
+
+
+
+                cout << "\nLista:" << endl;
+                lista->getList();
+
+                ///JSON saliente del servidor
+                string DeleteL = json_object_to_json_string(jobjDeleteL);
+
+                ///Envio al cliente
+                send(fd2, DeleteL.c_str(), MAXDATASIZE, 0);
+                printf("\nWRITE: %s\n", DeleteL.c_str());
+            }
 
             /*
             ///Obtendra un request para obtener
@@ -222,7 +331,7 @@ int runServer() {
 }
 
 int main() {
-    std::cout << "El ano se ha abierto!" << std::endl;
+    std::cout << "Prueba" << std::endl;
     List* prueba = new List();
     prueba->insertFirst(3);
     prueba->insertFirst(2);
