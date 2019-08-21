@@ -21,13 +21,13 @@ public:
     ArbolBinario();
     bool VacioAB();
     void MostrarInOrden();
-    void InOrden(NodoBinario*);
+    void InOrden(NodoBinario* p);
     void MostrarPreOrden();
-    void PreOrden(NodoBinario*);
+    void PreOrden(NodoBinario* p);
     void MostrarPostOrden();
-    void PostOrden(NodoBinario*);
-    void Ingresar(int);
-    string EliminarHi(int);
+    void PostOrden(NodoBinario* p);
+    void Ingresar(int d);
+    string EliminarHi(int d);
 
 private:
     NodoBinario *raiz;

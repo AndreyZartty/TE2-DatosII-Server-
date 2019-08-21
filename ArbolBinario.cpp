@@ -26,7 +26,7 @@ void ArbolBinario::InOrden(NodoBinario* p){
         if (p->der){
             InOrden(p->der);
         }
-        cout<<p->dato;
+        cout<<p->dato << endl;
     } else {
         return;
     }
@@ -37,7 +37,7 @@ void ArbolBinario::MostrarPreOrden(){
 }
 void ArbolBinario::PreOrden(NodoBinario* p){
     if (p != nullptr){
-        cout<<p->dato;
+        cout<<p->dato << endl;
         if (p->izq){
             PreOrden(p->izq);
         }
@@ -61,7 +61,7 @@ void ArbolBinario::PostOrden(NodoBinario* p){
         if (p->der){
             PreOrden(p->der);
         }
-        cout<<p->dato;
+        cout<<p->dato << endl;
     }
     else {
         return;
